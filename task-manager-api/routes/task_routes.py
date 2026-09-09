@@ -39,7 +39,7 @@ def get_tasks():
                 task_data['overdue'] = False
 
             if t.user_id:
-                user = User.query.get(t.user_id)
+                user = db.session.get(User, t.user_id)
                 if user:
                     task_data['user_name'] = user.name
                 else:
@@ -48,7 +48,7 @@ def get_tasks():
                 task_data['user_name'] = None
 
             if t.category_id:
-                cat = Category.query.get(t.category_id)
+                cat = db.session.get(Category, t.category_id)
                 if cat:
                     task_data['category_name'] = cat.name
                 else:
@@ -64,7 +64,7 @@ def get_tasks():
 
 @task_bp.route('/tasks/<int:task_id>', methods=['GET'])
 def get_task(task_id):
-    task = Task.query.get(task_id)
+    task = db.session.get(Task, task_id)
     if task:
         data = task.to_dict()
 
@@ -114,12 +114,12 @@ def create_task():
         return jsonify({'error': 'Prioridade deve ser entre 1 e 5'}), 400
 
     if user_id:
-        user = User.query.get(user_id)
+        user = db.session.get(User, user_id)
         if not user:
             return jsonify({'error': 'Usuário não encontrado'}), 404
 
     if category_id:
-        cat = Category.query.get(category_id)
+        cat = db.session.get(Category, category_id)
         if not cat:
             return jsonify({'error': 'Categoria não encontrada'}), 404
 
@@ -155,7 +155,7 @@ def create_task():
 
 @task_bp.route('/tasks/<int:task_id>', methods=['PUT'])
 def update_task(task_id):
-    task = Task.query.get(task_id)
+    task = db.session.get(Task, task_id)
     if not task:
         return jsonify({'error': 'Task não encontrada'}), 404
 
@@ -185,14 +185,14 @@ def update_task(task_id):
 
     if 'user_id' in data:
         if data['user_id']:
-            user = User.query.get(data['user_id'])
+            user = db.session.get(User, data['user_id'])
             if not user:
                 return jsonify({'error': 'Usuário não encontrado'}), 404
         task.user_id = data['user_id']
 
     if 'category_id' in data:
         if data['category_id']:
-            cat = Category.query.get(data['category_id'])
+            cat = db.session.get(Category, data['category_id'])
             if not cat:
                 return jsonify({'error': 'Categoria não encontrada'}), 404
         task.category_id = data['category_id']
@@ -224,7 +224,7 @@ def update_task(task_id):
 
 @task_bp.route('/tasks/<int:task_id>', methods=['DELETE'])
 def delete_task(task_id):
-    task = Task.query.get(task_id)
+    task = db.session.get(Task, task_id)
     if not task:
         return jsonify({'error': 'Task não encontrada'}), 404
 

@@ -3,7 +3,7 @@ from database import db
 from models.user import User
 from models.task import Task
 from datetime import datetime
-import hashlib, json, re
+import json, re, secrets
 
 user_bp = Blueprint('users', __name__)
 
@@ -26,7 +26,7 @@ def get_users():
 
 @user_bp.route('/users/<int:user_id>', methods=['GET'])
 def get_user(user_id):
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'Usuário não encontrado'}), 404
 
@@ -61,8 +61,8 @@ def create_user():
     if not re.match(r'^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$', email):
         return jsonify({'error': 'Email inválido'}), 400
 
-    if len(password) < 4:
-        return jsonify({'error': 'Senha deve ter no mínimo 4 caracteres'}), 400
+    if len(password) < 8:
+        return jsonify({'error': 'Senha deve ter no mínimo 8 caracteres'}), 400
 
     existing = User.query.filter_by(email=email).first()
     if existing:
@@ -91,7 +91,7 @@ def create_user():
 
 @user_bp.route('/users/<int:user_id>', methods=['PUT'])
 def update_user(user_id):
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'Usuário não encontrado'}), 404
 
@@ -112,7 +112,7 @@ def update_user(user_id):
         user.email = data['email']
 
     if 'password' in data:
-        if len(data['password']) < 4:
+        if len(data['password']) < 8:
             return jsonify({'error': 'Senha muito curta'}), 400
         user.set_password(data['password'])
 
@@ -133,7 +133,7 @@ def update_user(user_id):
 
 @user_bp.route('/users/<int:user_id>', methods=['DELETE'])
 def delete_user(user_id):
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'Usuário não encontrado'}), 404
 
@@ -152,7 +152,7 @@ def delete_user(user_id):
 
 @user_bp.route('/users/<int:user_id>/tasks', methods=['GET'])
 def get_user_tasks(user_id):
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'Usuário não encontrado'}), 404
 
@@ -207,5 +207,5 @@ def login():
     return jsonify({
         'message': 'Login realizado com sucesso',
         'user': user.to_dict(),
-        'token': 'fake-jwt-token-' + str(user.id)
+        'token': secrets.token_urlsafe(32)
     }), 200

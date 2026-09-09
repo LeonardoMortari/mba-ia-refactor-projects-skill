@@ -102,7 +102,7 @@ def summary_report():
 
 @report_bp.route('/reports/user/<int:user_id>', methods=['GET'])
 def user_report(user_id):
-    user = User.query.get(user_id)
+    user = db.session.get(User, user_id)
     if not user:
         return jsonify({'error': 'Usuário não encontrado'}), 404
 
@@ -189,7 +189,7 @@ def create_category():
 
 @report_bp.route('/categories/<int:cat_id>', methods=['PUT'])
 def update_category(cat_id):
-    cat = Category.query.get(cat_id)
+    cat = db.session.get(Category, cat_id)
     if not cat:
         return jsonify({'error': 'Categoria não encontrada'}), 404
 
@@ -210,7 +210,7 @@ def update_category(cat_id):
 
 @report_bp.route('/categories/<int:cat_id>', methods=['DELETE'])
 def delete_category(cat_id):
-    cat = Category.query.get(cat_id)
+    cat = db.session.get(Category, cat_id)
     if not cat:
         return jsonify({'error': 'Categoria não encontrada'}), 404
 
